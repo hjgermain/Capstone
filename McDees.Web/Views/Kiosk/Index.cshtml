@@ -1,0 +1,17 @@
+@model McDees.Web.Models.KioskIndexViewModel
+@{ ViewData["Title"] = "Kiosk"; }
+<div class="kiosk-shell">
+    <section class="menu-panel">
+        <div class="hero"><div><p class="eyebrow">WELCOME TO MCDEES</p><h1>What can we make<br />fresh for you?</h1></div><span>🍔</span></div>
+        @if (TempData["Message"] is string message) { <div class="toast-message">@message</div> }
+        <nav class="categories"><a class="@(Model.SelectedCategory == "All" ? "active" : "")" asp-route-category="All">All</a>@foreach (var category in Model.Categories) { <a class="@(Model.SelectedCategory == category ? "active" : "")" asp-route-category="@category">@category</a> }</nav>
+        <div class="menu-grid">
+        @foreach (var item in Model.Items) { <article class="menu-card"><div class="food-icon">@item.Emoji</div><div><p class="category-label">@item.Category</p><h2>@item.Name</h2><p>@item.Description</p><small>@item.DietaryNote</small><div class="card-bottom"><strong>@item.Price.ToString("C")</strong><a class="button" asp-action="Customize" asp-route-id="@item.Id">Customize +</a></div></div></article> }
+        </div>
+    </section>
+    <aside class="cart-panel">
+        <div class="cart-heading"><div><p class="eyebrow">YOUR ORDER</p><h2>@Model.CartCount item@(Model.CartCount == 1 ? "" : "s")</h2></div><span>🛍️</span></div>
+        @if (Model.Cart.Count == 0) { <div class="empty-cart"><span>🍟</span><h3>Your bag is empty</h3><p>Choose something delicious from the menu.</p></div> }
+        else { <div class="cart-lines">@for (var i = 0; i < Model.Cart.Count; i++) { var line = Model.Cart[i]; <div class="cart-line"><div><strong>@line.Name</strong><small>@string.Join(", ", line.Modifiers.Select(x => x.Name))</small><b>@line.LineTotal.ToString("C")</b></div><form asp-action="ChangeQuantity" method="post"><input type="hidden" name="line" value="@i" /><button name="quantity" value="@(line.Quantity - 1)" aria-label="Remove one">−</button><span>@line.Quantity</span><button name="quantity" value="@(line.Quantity + 1)" aria-label="Add one">+</button></form></div> }</div><div class="cart-total"><span>Estimated total</span><strong>@Model.CartTotal.ToString("C")</strong></div><a class="checkout-button" asp-action="Checkout">Review & place order →</a> }
+    </aside>
+</div>

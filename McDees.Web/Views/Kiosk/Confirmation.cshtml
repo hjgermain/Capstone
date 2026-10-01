@@ -1,0 +1,3 @@
+@model McDees.Web.Models.OrderConfirmation
+@{ ViewData["Title"] = "Order confirmed"; }
+<section class="confirmation"><div class="confirmation-card"><div class="checkmark">✓</div><p class="eyebrow">ORDER SENT TO THE KITCHEN</p><h1>We’ve got it!</h1><p>Show this pickup code when your order is ready.</p><div class="pickup-code">@Model.PickupCode</div><p class="order-number">Order #@Model.OrderNumber · @Model.Total.ToString("C")</p><a class="checkout-button" asp-action="Index">Start a new order</a></div></section>
