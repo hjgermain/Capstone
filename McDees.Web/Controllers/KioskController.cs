@@ -53,11 +53,11 @@ public sealed class KioskController(MenuCatalog catalog, OrderService orders) : 
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult PlaceOrder()
+    public async Task<IActionResult> PlaceOrder()
     {
         var cart = GetCart();
         if (cart.Count == 0) return RedirectToAction(nameof(Index));
-        var order = orders.Create(cart, BuildCheckout(cart).Total);
+        var order = await orders.CreateAsync(cart, BuildCheckout(cart).Total);
         HttpContext.Session.SetString(CartKey, "[]");
         TempData["OrderNumber"] = order.OrderNumber;
         TempData["PickupCode"] = order.PickupCode;
@@ -70,6 +70,11 @@ public sealed class KioskController(MenuCatalog catalog, OrderService orders) : 
         if (TempData["OrderNumber"] is not string number) return RedirectToAction(nameof(Index));
         return View(new OrderConfirmation(number, (string)TempData["PickupCode"]!, decimal.Parse((string)TempData["Total"]!), DateTimeOffset.Now));
     }
+
+    [HttpGet]
+    public IActionResult CurrentOrders() => Json(orders.GetKitchenOrders()
+        .Where(x => x.Status is "New" or "Being Prepared" or "Ready")
+        .Select(x => new { x.OrderNumber, x.PickupCode, x.Status, Items = x.Lines }));
 
     private List<CartLine> GetCart() => JsonSerializer.Deserialize<List<CartLine>>(HttpContext.Session.GetString(CartKey) ?? "[]") ?? [];
     private void SaveCart(List<CartLine> cart) => HttpContext.Session.SetString(CartKey, JsonSerializer.Serialize(cart));

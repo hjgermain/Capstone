@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is required. Set it with dotnet user-secrets.");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
@@ -50,6 +51,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Kiosk}/{action=Index}/{id?}")
     .WithStaticAssets();
+app.MapHub<McDees.Web.Hubs.KitchenHub>("/hubs/kitchen");
 
 using (var scope = app.Services.CreateScope())
 {

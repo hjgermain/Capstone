@@ -10,9 +10,9 @@ public sealed class KitchenController(OrderService orders) : Controller
     public IActionResult Index() => View(orders.GetKitchenOrders());
 
     [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult Advance(string orderNumber)
+    public async Task<IActionResult> Advance(string orderNumber)
     {
-        orders.Advance(orderNumber);
+        await orders.AdvanceAsync(orderNumber);
         return RedirectToAction(nameof(Index));
     }
 }

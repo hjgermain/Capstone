@@ -13,5 +13,43 @@
         <div class="cart-heading"><div><p class="eyebrow">YOUR ORDER</p><h2>@Model.CartCount item@(Model.CartCount == 1 ? "" : "s")</h2></div><span>🛍️</span></div>
         @if (Model.Cart.Count == 0) { <div class="empty-cart"><span>🍟</span><h3>Your bag is empty</h3><p>Choose something delicious from the menu.</p></div> }
         else { <div class="cart-lines">@for (var i = 0; i < Model.Cart.Count; i++) { var line = Model.Cart[i]; <div class="cart-line"><div><strong>@line.Name</strong><small>@string.Join(", ", line.Modifiers.Select(x => x.Name))</small><b>@line.LineTotal.ToString("C")</b></div><form asp-action="ChangeQuantity" method="post"><input type="hidden" name="line" value="@i" /><button name="quantity" value="@(line.Quantity - 1)" aria-label="Remove one">−</button><span>@line.Quantity</span><button name="quantity" value="@(line.Quantity + 1)" aria-label="Add one">+</button></form></div> }</div><div class="cart-total"><span>Estimated total</span><strong>@Model.CartTotal.ToString("C")</strong></div><a class="checkout-button" asp-action="Checkout">Review & place order →</a> }
+        <section class="live-orders" aria-live="polite"><div class="live-orders-heading"><div><p class="eyebrow">LIVE ORDER BOARD</p><h3>In the kitchen now</h3></div><span class="live-dot" title="Live updates"></span></div><div id="current-orders"><p class="live-empty">Loading current orders…</p></div></section>
     </aside>
 </div>
+
+@section Scripts {
+<script>
+    const board = document.getElementById("current-orders");
+    const statusClass = status => status.toLowerCase().replaceAll(" ", "-");
+    async function loadCurrentOrders() {
+        try {
+            const response = await fetch("@Url.Action("CurrentOrders", "Kiosk")", { cache: "no-store" });
+            const orders = await response.json();
+            board.replaceChildren();
+            if (!orders.length) {
+                const message = document.createElement("p"); message.className = "live-empty"; message.textContent = "No current orders yet."; board.append(message); return;
+            }
+            orders.forEach(order => {
+                const card = document.createElement("article"); card.className = "live-order";
+                const top = document.createElement("div"); top.className = "live-order-top";
+                const number = document.createElement("strong"); number.textContent = `Order #${order.orderNumber}`;
+                const status = document.createElement("span"); status.className = `status ${statusClass(order.status)}`; status.textContent = order.status;
+                top.append(number, status); card.append(top);
+                const pickup = document.createElement("small"); pickup.textContent = `Pickup code: ${order.pickupCode}`; card.append(pickup);
+                const items = document.createElement("p"); items.textContent = order.items.join(" · "); card.append(items);
+                board.append(card);
+            });
+        } catch { board.innerHTML = '<p class="live-empty">Order board is reconnecting…</p>'; }
+    }
+    function connectOrderUpdates() {
+        const protocol = location.protocol === "https:" ? "wss" : "ws";
+        const socket = new WebSocket(`${protocol}://${location.host}/hubs/kitchen`);
+        socket.onopen = () => socket.send('{"protocol":"json","version":1}\u001e');
+        socket.onmessage = event => event.data.split("\u001e").filter(Boolean).forEach(message => {
+            const payload = JSON.parse(message); if (payload.target === "orderUpdated") loadCurrentOrders();
+        });
+        socket.onclose = () => setTimeout(connectOrderUpdates, 2500);
+    }
+    loadCurrentOrders(); connectOrderUpdates(); setInterval(loadCurrentOrders, 5000);
+</script>
+}
