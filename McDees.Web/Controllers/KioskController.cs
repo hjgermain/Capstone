@@ -57,7 +57,7 @@ public sealed class KioskController(MenuCatalog catalog, OrderService orders) : 
     {
         var cart = GetCart();
         if (cart.Count == 0) return RedirectToAction(nameof(Index));
-        var order = orders.Create(BuildCheckout(cart).Total);
+        var order = orders.Create(cart, BuildCheckout(cart).Total);
         HttpContext.Session.SetString(CartKey, "[]");
         TempData["OrderNumber"] = order.OrderNumber;
         TempData["PickupCode"] = order.PickupCode;

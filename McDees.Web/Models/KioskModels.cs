@@ -33,3 +33,12 @@ public sealed class CheckoutViewModel
 }
 
 public sealed record OrderConfirmation(string OrderNumber, string PickupCode, decimal Total, DateTimeOffset CreatedAt);
+
+public sealed class KitchenOrder
+{
+    public required string OrderNumber { get; init; }
+    public required string PickupCode { get; init; }
+    public required List<string> Lines { get; init; }
+    public required DateTimeOffset CreatedAt { get; init; }
+    public string Status { get; set; } = "New";
+}

@@ -6,4 +6,5 @@ namespace McDees.Web.Data;
 public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
     : IdentityDbContext<ApplicationUser>(options)
 {
+    public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
 }

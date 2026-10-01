@@ -15,6 +15,8 @@ McDees is a restaurant operations prototype. The current milestone is a customer
 - Add, increase, decrease, and remove cart items; the cart remains available during the browser session.
 - Review an order with estimated tax and a simulated pay-at-pickup checkout.
 - Receive a generated order number and pickup code.
+- Send new kiosk orders to the role-protected Kitchen Production Display, where employees can advance each ticket through its preparation states.
+- Let managers view a prototype-wide inventory endpoint with on-hand amounts, reorder thresholds, values, and low-stock flags.
 
 The menu and order services are deliberately separated from MVC pages so they can next be backed by PostgreSQL, ASP.NET Core Identity, and the kitchen production display.
 
@@ -32,6 +34,11 @@ The application uses PostgreSQL and ASP.NET Core Identity without migrations dur
 The **Restaurant tools** page contains an Admin-only control to destroy and rebuild the prototype database. Type `REBUILD` in the confirmation field before it will execute. It immediately restores the development roles and accounts, then signs the administrator out.
 
 The required PostgreSQL connection string is read from .NET user-secrets as `ConnectionStrings:DefaultConnection`; it is deliberately not stored in this repository.
+
+## Operations routes
+
+- `/Kitchen` — available to Employee, Manager, and Admin accounts. Kiosk orders live in memory for the current application session.
+- `/Inventory` — available to Manager, Admin, Owner, and Corporate accounts. The prototype seeds 21 inventory items when the inventory table is empty.
 
 ## Prototype limits
 
