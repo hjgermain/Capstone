@@ -12,7 +12,15 @@
 <body>
     <header class="site-header">
         <a class="brand" asp-controller="Kiosk" asp-action="Index"><span>Mc</span>Dees</a>
-        <p>Order here • Pick up fresh</p>
+        <div class="header-actions">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager")) { <a asp-controller="Admin" asp-action="Index">Restaurant tools</a> }
+                else if (User.IsInRole("Employee")) { <a asp-controller="Staff" asp-action="Index">My shift</a> }
+                <form asp-controller="Account" asp-action="Logout" method="post"><button type="submit">Sign out</button></form>
+            }
+            else { <a class="login-link" asp-controller="Account" asp-action="Login">Sign in to your account</a> }
+        </div>
     </header>
     <main role="main">@RenderBody()</main>
 

@@ -18,6 +18,21 @@ McDees is a restaurant operations prototype. The current milestone is a customer
 
 The menu and order services are deliberately separated from MVC pages so they can next be backed by PostgreSQL, ASP.NET Core Identity, and the kitchen production display.
 
+## Prototype sign-in and database
+
+The application uses PostgreSQL and ASP.NET Core Identity without migrations during rapid prototyping. On startup it calls `EnsureCreated` and seeds these development accounts, all with password `xyzzy123`:
+
+| Account | Role | Landing page |
+| --- | --- | --- |
+| `customer@mcdees.local` | Customer | Customer kiosk |
+| `employee@mcdees.local` | Employee | Employee workspace |
+| `manager@mcdees.local` | Manager | Restaurant tools |
+| `admin@mcdees.local` | Admin, Manager | Restaurant tools + database reset |
+
+The **Restaurant tools** page contains an Admin-only control to destroy and rebuild the prototype database. Type `REBUILD` in the confirmation field before it will execute. It immediately restores the development roles and accounts, then signs the administrator out.
+
+The required PostgreSQL connection string is read from .NET user-secrets as `ConnectionStrings:DefaultConnection`; it is deliberately not stored in this repository.
+
 ## Prototype limits
 
 Orders and the menu are currently in memory. Restarting the application clears them. No payment, authentication, inventory, or kitchen queue persistence has been added yet.
